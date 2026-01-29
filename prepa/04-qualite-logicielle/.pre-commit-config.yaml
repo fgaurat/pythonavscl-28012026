@@ -1,0 +1,147 @@
+# =============================================================================
+# Configuration pre-commit
+# =============================================================================
+#
+# Installation :
+#   pip install pre-commit
+#   pre-commit install
+#
+# Exécution manuelle :
+#   pre-commit run --all-files
+#
+# Mise à jour des hooks :
+#   pre-commit autoupdate
+
+# Version minimale de pre-commit requise
+minimum_pre_commit_version: '3.0.0'
+
+# Exclure certains fichiers globalement
+exclude: |
+  (?x)^(
+      \.git/.*|
+      \.venv/.*|
+      build/.*|
+      dist/.*
+  )$
+
+repos:
+  # =========================================================================
+  # Hooks généraux
+  # =========================================================================
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.5.0
+    hooks:
+      # Vérification de fin de fichier
+      - id: end-of-file-fixer
+        description: "S'assure que les fichiers se terminent par une nouvelle ligne"
+
+      # Suppression des espaces en fin de ligne
+      - id: trailing-whitespace
+        description: "Supprime les espaces en fin de ligne"
+
+      # Vérification de fichiers YAML
+      - id: check-yaml
+        description: "Vérifie la syntaxe YAML"
+
+      # Vérification de fichiers JSON
+      - id: check-json
+        description: "Vérifie la syntaxe JSON"
+
+      # Vérification de fichiers TOML
+      - id: check-toml
+        description: "Vérifie la syntaxe TOML"
+
+      # Détection de secrets
+      - id: detect-private-key
+        description: "Détecte les clés privées"
+
+      # Vérification des conflits de merge
+      - id: check-merge-conflict
+        description: "Vérifie les marqueurs de conflit de merge"
+
+      # Vérification de gros fichiers
+      - id: check-added-large-files
+        args: ['--maxkb=500']
+        description: "Empêche l'ajout de fichiers > 500KB"
+
+      # Vérification des liens symboliques
+      - id: check-symlinks
+        description: "Vérifie les liens symboliques cassés"
+
+  # =========================================================================
+  # Ruff - Linter et formateur Python
+  # =========================================================================
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.1.9
+    hooks:
+      # Linting avec correction automatique
+      - id: ruff
+        args: [--fix, --exit-non-zero-on-fix]
+        description: "Lint Python avec Ruff"
+
+      # Formatage (remplace Black)
+      - id: ruff-format
+        description: "Formate Python avec Ruff"
+
+  # =========================================================================
+  # Mypy - Vérification des types
+  # =========================================================================
+  - repo: https://github.com/pre-commit/mirrors-mypy
+    rev: v1.8.0
+    hooks:
+      - id: mypy
+        description: "Vérifie les types avec Mypy"
+        # Dépendances additionnelles pour les stubs de type
+        additional_dependencies:
+          - types-requests
+          - types-PyYAML
+
+  # =========================================================================
+  # Alternative : Black + isort (si vous préférez à Ruff)
+  # =========================================================================
+  # Décommentez si vous voulez utiliser Black au lieu de Ruff format
+
+  # - repo: https://github.com/psf/black
+  #   rev: 24.1.1
+  #   hooks:
+  #     - id: black
+  #       language_version: python3
+
+  # - repo: https://github.com/pycqa/isort
+  #   rev: 5.13.2
+  #   hooks:
+  #     - id: isort
+  #       args: ["--profile", "black"]
+
+  # =========================================================================
+  # Bandit - Analyse de sécurité
+  # =========================================================================
+  - repo: https://github.com/PyCQA/bandit
+    rev: 1.7.7
+    hooks:
+      - id: bandit
+        args: ["-c", "pyproject.toml"]
+        description: "Analyse de sécurité avec Bandit"
+        additional_dependencies: ["bandit[toml]"]
+
+  # =========================================================================
+  # Commitizen - Format de commit
+  # =========================================================================
+  # Optionnel : force les messages de commit conventionnels
+
+  # - repo: https://github.com/commitizen-tools/commitizen
+  #   rev: v3.13.0
+  #   hooks:
+  #     - id: commitizen
+  #       stages: [commit-msg]
+
+# =============================================================================
+# Configuration CI
+# =============================================================================
+# Pour l'intégration continue, utilisez :
+#   pre-commit run --all-files
+#
+# Ou configurez pre-commit.ci pour une exécution automatique :
+# ci:
+#   autofix_prs: true
+#   autoupdate_schedule: weekly
